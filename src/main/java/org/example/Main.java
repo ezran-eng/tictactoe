@@ -5,15 +5,8 @@ import java.util.Scanner;
 /*
 
 PRE-REQUISITOS QUE DEBEN APLICARSE EN EL DESARROLLO DEL CODIGO
-1-Boolean and logical operations
-2-Relational operators
-3-Conditional statement
-4-Ternary operator
-5-The while and do-while loops
-6-The for-loop
-7-Branching statements
-8-Iterating over arrays
-9-Multidimensional array
+1-Write, compile, and run
+2-Errors in programs
 
 Descripción
 En esta etapa, vamos a analizar el estado del juego para determinar si alguno de los jugadores ya ha ganado el juego o si todavía está en curso, si el juego es un empate, o si el usuario ha ingresado un estado de juego imposible (dos ganadores o con un jugador que ha hecho demasiados movimientos).
@@ -34,159 +27,95 @@ Puedes elegir si usar un espacio o un guion bajo _ para imprimir las celdas vac�
 
 EJEMPLOS
 El símbolo mayor que seguido de un espacio (> ) representa la entrada del usuario. Ten en cuenta que no forma parte de la entrada.
-ejemplo 1
-> XXXOO__O_
----------
-| X X X |
-| O O _ |
-| _ O _ |
----------
-X wins
 
-ejemplo 2
-> XOXOXOXXO
----------
-| X O X |
-| O X O |
-| X X O |
----------
-X wins
 
-ejemplo 3
-> XOOOXOXXO
----------
-| X O O |
-| O X O |
-| X X O |
----------
-O wins
-
-ejemplo 4
-> XOXOOXXXO
----------
-| X O X |
-| O O X |
-| X X O |
----------
-Draw
-
-ejemplo 5
-> XO_OOX_X_
----------
-| X O   |
-| O O X |
-|   X   |
----------
-Game not finished
-
-ejemplo 6
-> XO_XO_XOX
----------
-| X O _ |
-| X O _ |
-| X O X |
----------
-Impossible
-
-ejemplo 7
-> _O_X__X_X
----------
-|   O   |
-| X     |
-| X   X |
----------
-Impossible
-
-ejemplo 8
-> _OOOO_X_X
----------
-|   O O |
-| O O   |
-| X   X |
----------
-Impossible
-
-PISTAS
-1. Primero contar X y O.
-Si 'X' + 'X' + 'X' => 264, X gana.
-Si 'O' + 'O' + 'O' => 237, O gana.
-Si x + o = 9, entonces no hay celdas vacías.
-Si ambos ganan o (xs-os>1 o os-xs>1), entonces es imposible.
-De lo contrario, cualquiera gana (x u o)
-Si hay una celda vacía, entonces el juego no ha terminado.
-De lo contrario, es un empate."
 */
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        char[][] grid = new char[3][3];
-        int numX = 0, numO = 0;
+        String input = "_________"; // Cuadrícula del juego
+        char[] cells = input.toCharArray();
 
-        // Pide al usuario que ingrese la cadena representando el estado actual del juego
-        System.out.print("Ingresa el estado actual del juego: ");
-        String input = scanner.nextLine().toUpperCase();
+        printGrid(cells); // Imprimir cuadrícula del juego
 
-        // Llena la cuadrícula del juego con la cadena de entrada
-        int index = 0;
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
-                grid[row][col] = input.charAt(index);
-                if (grid[row][col] == 'X') {
-                    numX++;
-                } else if (grid[row][col] == 'O') {
-                    numO++;
+        while (true) {
+            boolean xWins = checkWin(cells, 'X');
+            boolean oWins = checkWin(cells, 'O');
+            boolean emptyCells = checkEmptyCells(cells);
+
+            if (xWins && oWins || Math.abs(countCells(cells, 'X') - countCells(cells, 'O')) > 1) {
+                System.out.println("Impossible");
+                break;
+            } else if (xWins) {
+                System.out.println("X wins");
+                break;
+            } else if (oWins) {
+                System.out.println("O wins");
+                break;
+            } else if (!emptyCells) {
+                System.out.println("Draw");
+                break;
+            }
+
+            System.out.print("Enter the coordinates: ");
+            int row = scanner.nextInt() - 1;
+            int col = scanner.nextInt() - 1;
+
+            if (row < 0 || row > 2 || col < 0 || col > 2) {
+                System.out.println("Coordinates should be from 1 to 3!");
+            } else {
+                int index = 3 * row + col;
+                if (cells[index] != '_') {
+                    System.out.println("This cell is occupied! Choose another one!");
+                } else {
+                    cells[index] = getPlayer(cells);
+                    printGrid(cells);
                 }
-                index++;
             }
         }
+    }
 
-        // Imprime la cuadrícula del juego
+    public static void printGrid(char[] cells) {
         System.out.println("---------");
-        for (int row = 0; row < 3; row++) {
-            System.out.print("| ");
-            for (int col = 0; col < 3; col++) {
-                System.out.print(grid[row][col] + " ");
-            }
-            System.out.println("|");
-        }
+        System.out.printf("| %c %c %c |\n", cells[0], cells[1], cells[2]);
+        System.out.printf("| %c %c %c |\n", cells[3], cells[4], cells[5]);
+        System.out.printf("| %c %c %c |\n", cells[6], cells[7], cells[8]);
         System.out.println("---------");
+    }
 
-        // Analiza el estado del juego y muestra el resultado
-        boolean xWins = false, oWins = false;
-        for (int i = 0; i < 3; i++) {
-            if (grid[i][0] == 'X' && grid[i][1] == 'X' && grid[i][2] == 'X') {
-                xWins = true;
-            } else if (grid[i][0] == 'O' && grid[i][1] == 'O' && grid[i][2] == 'O') {
-                oWins = true;
-            }
-            if (grid[0][i] == 'X' && grid[1][i] == 'X' && grid[2][i] == 'X') {
-                xWins = true;
-            } else if (grid[0][i] == 'O' && grid[1][i] == 'O' && grid[2][i] == 'O') {
-                oWins = true;
-            }
-        }
-        if (grid[0][0] == 'X' && grid[1][1] == 'X' && grid[2][2] == 'X') {
-            xWins = true;
-        } else if (grid[0][0] == 'O' && grid[1][1] == 'O' && grid[2][2] == 'O') {
-            oWins = true;
-        }
-        if (grid[0][2] == 'X' && grid[1][1] == 'X' && grid[2][0] == 'X') {
-            xWins = true;
-        } else if (grid[0][2] == 'O' && grid[1][1] == 'O' && grid[2][0] == 'O') {
-            oWins = true;
-        }
+    public static boolean checkWin(char[] cells, char player) {
+        return (cells[0] == player && cells[1] == player && cells[2] == player) ||
+                (cells[3] == player && cells[4] == player && cells[5] == player) ||
+                (cells[6] == player && cells[7] == player && cells[8] == player) ||
+                (cells[0] == player && cells[3] == player && cells[6] == player) ||
+                (cells[1] == player && cells[4] == player && cells[7] == player) ||
+                (cells[2] == player && cells[5] == player && cells[8] == player) ||
+                (cells[0] == player && cells[4] == player && cells[8] == player) ||
+                (cells[2] == player && cells[4] == player && cells[6] == player);
+    }
 
-        if (xWins && oWins || Math.abs(numX - numO) > 1) {
-            System.out.println("Estado del juego ilegal");
-        } else if (xWins) {
-            System.out.println("X gana");
-        } else if (oWins) {
-            System.out.println("O gana");
-        } else if (numX + numO == 9) {
-            System.out.println("Empate");
-        } else {
-            System.out.println("Juego no terminado");
+    public static boolean checkEmptyCells(char[] cells) {
+        for (char cell : cells) {
+            if (cell == '_') {
+                return true;
+            }
         }
-        scanner.close();
+        return false;
+    }
+
+    public static int countCells(char[] cells, char player) {
+        int count = 0;
+        for (char cell : cells) {
+            if (cell == player) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public static char getPlayer(char[] cells) {
+        int xCount = countCells(cells, 'X');
+        int oCount = countCells(cells, 'O');
+        return (xCount == oCount) ? 'X' : 'O';
     }
 }
